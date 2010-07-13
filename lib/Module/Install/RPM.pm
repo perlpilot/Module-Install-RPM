@@ -8,33 +8,11 @@ our $VERSION = '0.01';
 
 BEGIN { $| = 1; }
 
+# Just gather the list of required RPMs and their versions
 sub requires_rpm {
     my ($self, $rpm, $version) = @_;
-    
-    unless ($self->can_run('rpm')) {
-        warn "Unable to locate ``rpm'' executable\n";
-        return;
-    }
-
-    print "Checking for required rpm $rpm: ";
-    chomp(my $query = qx(rpm -q $rpm));
-    if ($query =~ /not installed/) {
-        print "NOT OK\n";
-        warn "\t$rpm is not installed\n";
-        return;
-    }
-    my @parts = split /-/, $query;
-    pop @parts;                 # remove and ignore patch level
-    my $rpm_version = pop @parts;
-
-    if ($version && _version_cmp($rpm_version, $version) == -1) {
-        print "NOT OK\n";
-        warn "\tat least version $version required, but found $rpm_version instead\n";
-        return;
-    }
-    print "OK\n";
+    push @{$self->{rpms}}, [ $rpm, $version ];
 }
-
 
 sub _version_cmp {
     my ($v1, $v2) = @_;
@@ -48,6 +26,48 @@ sub _version_cmp {
         return $c if $c;
     }
     return 0;
+}
+
+sub _check_rpms {
+    my $self = shift;
+
+    unless ($self->can_run('rpm')) {
+        die "ERROR: Unable to locate ``rpm'' executable\n";
+    }
+
+    my $maxlen = 0;
+    for my $r (@{$self->{rpms}}) {
+        my $l = length($r->[0]);
+        $maxlen = $l if $l > $maxlen;
+    }
+
+    print "*** Checking for required RPMS\n";
+    for my $r (@{$self->{rpms}}) {
+        my ($rpm,$version) = @$r;
+        printf " - %-${maxlen}s ...", $rpm;
+        chomp(my $query = qx(rpm -q $rpm));
+        if ($query =~ /not installed/) {
+            print "missing", $version ? " (need version $version) " : '', "\n";
+            next;
+        }
+        my @parts = split /-/, $query;
+        pop @parts;                 # remove and ignore patch level
+        my $rpm_version = pop @parts;
+
+        if ($version && _version_cmp($rpm_version, $version) == -1) {
+            print "too old ($rpm_version < $version)\n";
+            next;
+        }
+        print "OK\n";
+    }
+}
+
+sub WriteAll {
+    my $self = shift;
+
+    $self->_check_rpms;
+
+    return Module::Install::WriteAll::WriteAll($self);
 }
 
 1;
