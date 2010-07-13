@@ -2,6 +2,7 @@ package Module::Install::RPM;
 
 use strict; use warnings;
 use base 'Module::Install::Base';
+use 5.008;
 
 our $VERSION = '0.01';
 
@@ -13,20 +14,31 @@ sub requires_rpm {
         return;
     }
 
-    my $query = qx(rpm -q $rpm);
+    chomp(my $query = qx(rpm -q $rpm));
     my @parts = split /-/, $query;
-    pop @parts;     # remove patch level
+    pop @parts;                 # remove and ignore patch level
     my $rpm_version = pop @parts;
     my ($rpm_name) = $query =~ m/(.*?)-\d/;
 
-    if ($version && index($rpm_version, $version) != 0) {
-        warn "$rpm version $version required, but found $rpm_version\n";
+    if ($version && _version_cmp($rpm_version, $version) == -1) {
+        warn " -- $rpm at least version $version required, but found $rpm_version instead\n";
         return;
     }
-    
-    print "$query\n$rpm_version\n$rpm_name\n";
+}
 
-#    system('rpm', $rpm);
+
+sub _version_cmp {
+    my ($v1, $v2) = @_;
+
+    my @v1 = split /\./, $v1;
+    my @v2 = split /\./, $v2;
+
+    my $end = @v1 < @v2 ? $#v1 : $#v2;
+    for my $i (0..$end) {
+        my $c = $v1[$i] <=> $v2[$i];
+        return $c if $c;
+    }
+    return 0;
 }
 
 1;
@@ -53,6 +65,8 @@ Module::Install::RPM - provide that certain RPMs be installed
 
 Jonathan Scott Duff <duff@pobox.com>
 
-=head1 LICENSE
+=head1 COPYRIGHT
+
+Copyright Jonathan Scott Duff 2010
 
 This software is licensed under the same terms as Perl.
