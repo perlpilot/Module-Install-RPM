@@ -41,7 +41,7 @@ sub _check_rpms {
         $maxlen = $l if $l > $maxlen;
     }
 
-    print "*** Checking for required RPMS\n";
+    print "*** Checking for required RPMs\n";
     for my $r (@{$self->{rpms}}) {
         my ($rpm,$version) = @$r;
         printf " - %-${maxlen}s ...", $rpm;
@@ -92,22 +92,19 @@ Module::Install::RPM - require certain RPMs be installed
 
 =head1 DESCRIPTION
 
-Provide a mechanism for a Perl module to require that certain RPMs are installed.
+Provide a mechanism for a Perl module to require that certain RPMs are
+installed and that they optionally meet some minimum version requirements.
 
-This is only useful for Linux distributions that utilize the RedHat Package Manager
-to maintain package installation.
+B<NOTE:> This is only useful for Linux distributions that utilize the RedHat
+Package Manager to maintain package information.
 
 =head1 BUGS
 
 There is no check that the code is being executed on the appropriate operating
 system.
 
-=head1 AUTHOR
-
-Jonathan Scott Duff <duff@pobox.com>
-
 =head1 COPYRIGHT
 
-Copyright Jonathan Scott Duff 2010
+Copyright 2010 Jonathan Scott Duff <duff@pobox.com>
 
 This software is licensed under the same terms as Perl.
