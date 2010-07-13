@@ -1,7 +1,7 @@
 package Module::Install::RPM;
 
 use strict; use warnings;
-use parent 'Module::Install::Base';
+use base 'Module::Install::Base';
 
 our $VERSION = '0.01';
 
@@ -19,6 +19,10 @@ sub requires_rpm {
     my $rpm_version = pop @parts;
     my ($rpm_name) = $query =~ m/(.*?)-\d/;
 
+    if ($version && index($rpm_version, $version) != 0) {
+        warn "$rpm version $version required, but found $rpm_version\n";
+        return;
+    }
     
     print "$query\n$rpm_version\n$rpm_name\n";
 
