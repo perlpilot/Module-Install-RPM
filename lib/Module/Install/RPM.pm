@@ -18,7 +18,6 @@ sub requires_rpm {
     my @parts = split /-/, $query;
     pop @parts;                 # remove and ignore patch level
     my $rpm_version = pop @parts;
-    my ($rpm_name) = $query =~ m/(.*?)-\d/;
 
     if ($version && _version_cmp($rpm_version, $version) == -1) {
         warn " -- $rpm at least version $version required, but found $rpm_version instead\n";
