@@ -6,6 +6,8 @@ use 5.008;
 
 our $VERSION = '0.01';
 
+BEGIN { $| = 1; }
+
 sub requires_rpm {
     my ($self, $rpm, $version) = @_;
     
@@ -14,15 +16,23 @@ sub requires_rpm {
         return;
     }
 
+    print "Checking for required rpm $rpm: ";
     chomp(my $query = qx(rpm -q $rpm));
+    if ($query =~ /not installed/) {
+        print "NOT OK\n";
+        warn "\t$rpm is not installed\n";
+        return;
+    }
     my @parts = split /-/, $query;
     pop @parts;                 # remove and ignore patch level
     my $rpm_version = pop @parts;
 
     if ($version && _version_cmp($rpm_version, $version) == -1) {
-        warn " -- $rpm at least version $version required, but found $rpm_version instead\n";
+        print "NOT OK\n";
+        warn "\tat least version $version required, but found $rpm_version instead\n";
         return;
     }
+    print "OK\n";
 }
 
 
