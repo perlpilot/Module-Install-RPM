@@ -62,11 +62,13 @@ sub _check_rpms {
     }
 }
 
+# TODO: Is there a better method to hook into this process?
 sub WriteAll {
     my $self = shift;
 
     $self->_check_rpms;
 
+    # TODO: surely there's a better way to do this
     return Module::Install::WriteAll::WriteAll($self);
 }
 
