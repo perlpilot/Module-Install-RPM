@@ -46,7 +46,7 @@ __END__
 
 =head1 NAME
 
-Module::Install::RPM - provide that certain RPMs be installed
+Module::Install::RPM - require certain RPMs be installed
 
 =head1 SYNOPSIS
 
@@ -59,6 +59,18 @@ Module::Install::RPM - provide that certain RPMs be installed
   requires_rpm  'httpd' => '2.2';
 
   WriteAll;
+
+=head1 DESCRIPTION
+
+Provide a mechanism for a Perl module to require that certain RPMs are installed.
+
+This is only useful for Linux distributions that utilize the RedHat Package Manager
+to maintain package installation.
+
+=head1 BUGS
+
+There is no check that the code is being executed on the appropriate operating
+system.
 
 =head1 AUTHOR
 
